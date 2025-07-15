@@ -1,0 +1,25 @@
+# Ignore system logs
+application/logs/
+!application/logs/index.html
+
+# Ignore cache
+application/cache/
+!application/cache/index.html
+
+# Ignore uploaded files (optional)
+uploads/
+!uploads/index.html
+
+# Composer dependencies (if used)
+vendor/
+
+# Environment configuration (if used)
+.env
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# IDE / editor folders
+.vscode/
+.idea/
