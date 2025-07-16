@@ -10,13 +10,6 @@ class PaymentMethod extends CI_Controller
         $this->load->model('M_Financial', 'finance');
     }
 
-    // public function index()
-    // {
-    //     $data['title'] = 'Payment Accept';
-    //     $data['content'] = "v_payment_accept";
-    //     $this->load->view('v_payment_accept', $data, FALSE);
-    // }
-
     public function index()
     {
         $data['content'] = "v_payment_accept";

@@ -158,6 +158,7 @@
             echo ' 
                   <li><a href="' . base_url('index.php/PaymentMethod') . '"><i class="fa fa-inr"></i><span>Payment Accept</span></a></li>';
           }
+
           ?>
         </ul>
       </nav>
