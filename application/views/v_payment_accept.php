@@ -45,11 +45,11 @@
                                     <td><?= $obj->detail ?? ''; ?></td>
                                     <td><?= $obj->logic ?? ''; ?></td>
                                     <td>
-                                        <a href="javascript:void(0);" class="btn btn-sm btn-info open-view-modal" data-title="View Payment" data-url="<?= base_url('PaymentMethod/view/' . $obj->cid); ?>">
+                                        <a href="javascript:void(0);" class="btn btn-sm btn-info open-view-modal" data-title="View Payment" data-url="<?= base_url('index.php/PaymentMethod/view/' . $obj->cid); ?>">
                                             View
                                         </a>
 
-                                        <a href="javascript:void(0);" class="btn btn-sm btn-warning open-edit-modal" data-title="Edit Payment" data-url="<?= base_url('PaymentMethod/edit/' . $obj->cid); ?>">
+                                        <a href="javascript:void(0);" class="btn btn-sm btn-warning open-edit-modal" data-title="Edit Payment" data-url="<?= base_url('index.php/PaymentMethod/edit/' . $obj->cid); ?>">
                                             Edit
                                         </a>
 
@@ -60,6 +60,7 @@
                                 </tr>
                             <?php
                             }
+                            
                         } else { ?>
                             <tr>
                                 <td colspan="5" class="text-center text-muted">No records found</td>
@@ -191,7 +192,7 @@
         </div>
     </div>
 
-    
+
     <div class="modal fade" id="kml">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -285,7 +286,7 @@
             if (hasError) return;
 
             $.ajax({
-                url: '<?= base_url('PaymentMethod/save') ?>',
+                url: '<?= base_url('index.php/PaymentMethod/save') ?>',
                 type: 'POST',
                 data: {
                     pname,
@@ -360,7 +361,7 @@
             if (hasError) return;
 
             $.ajax({
-                url: '<?= base_url('PaymentMethod/update') ?>',
+                url: '<?= base_url('index.php/PaymentMethod/update') ?>',
                 type: 'POST',
                 dataType: 'json',
                 data: {
@@ -398,7 +399,7 @@
 
             if (confirm('Are you sure you want to delete this payment?')) {
                 $.ajax({
-                    url: '<?= base_url('PaymentMethod/delete') ?>',
+                    url: '<?= base_url('index.php/PaymentMethod/delete') ?>',
                     type: 'POST',
                     data: {
                         cid

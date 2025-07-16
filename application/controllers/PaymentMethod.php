@@ -38,6 +38,8 @@ class PaymentMethod extends CI_Controller
         }
     }
 
+    
+
     public function get_by_id($cid)
     {
         return $this->db->get_where('tabpaycon', ['cid' => $cid])->row();
