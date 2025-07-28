@@ -10,12 +10,24 @@ class M_flow extends CI_Model
 		return $tm_user;
 	}
 
+	// public function get_user()
+	// {
+	// 	$tm_user=$this->db->LIKE('level','Financial','after')
+	// 	->get('user')->result();
+	// 	return $tm_user;
+
+	// }
 	public function get_user()
 	{
-		$tm_user = $this->db->LIKE('level', 'Financial', 'after')
-			->get('user')->result();
+		$this->db->group_start()
+			->like('level', 'Contractor', 'after')
+			->or_where('level', 'Admin')
+			->group_end();
+
+		$tm_user = $this->db->get('user')->result();
 		return $tm_user;
 	}
+
 	public function save_flow()
 	{
 		$a = explode(':', $this->input->post('pkgid'));

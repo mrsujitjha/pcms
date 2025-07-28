@@ -42,21 +42,68 @@ class M_Financial extends CI_Model
 	}
 
 
-	
-	// public function generate_invoice()
-	// {
-	// 	$a = $this->input->post('proad');
-	// 	$locationitem = "(SELECT CONCAT(M.pid,M.itemid)bid,M.itemid,M.T,M.qyt,M.wp,M.mw,(SELECT logic from tabpaycon Where cid= M.l)l FROM (SELECT Sum(C.T)T,Sum(C.qyt)qyt,D.wp,D.mw,D.condition as l,C.pid,C.itemid FROM (SELECT A.pid,A.rid,tabitemcode.itemid,A.qyt,A.rlength as T FROM (SELECT Substring(itemcode,1,5)as pid,Substring(itemcode,1,3) as rid,itemsize,if(rem='%',descrip,count(itemsize)) as rlength,if(rem='%',Round(percent*descrip/100,0),Sum(if(progress='COMPLETED',1,0))) as qyt FROM tabschedule GROUP BY  Substring(itemcode,1,3),itemsize)As A JOIN tabitemcode ON tabitemcode.name=A.itemsize) as C LEFT JOIN
-	// 			(SELECT tabsubweight.*,tabweightage.mw,tabweightage.roadid FROM `tabsubweight` JOIN tabweightage ON tabweightage.id=tabsubweight.wid) as D ON D.roadid=C.rid  AND D.itemid=C.itemid WHERE  D.roadid='" . $a . "'GROUP BY D.mw,D.wp,itemid) as M) AS F1";
-	// 	$this->prepare_bill($locationitem);
-	// 	$linearitem = "(SELECT(M.pid)bid,substring(M.itemid,1,3)itemid,M.T,M.qyt,M.wp,M.mw,(SELECT logic from tabpaycon Where cid= M.l)l FROM (SELECT Sum(C.T)T,Sum(C.qyt)qyt,D.wp,D.mw,D.condition as l,C.pid,C.itemid FROM(SELECT B.pid,B.rid,B.itemid,B.qyt,(SELECT sum(toch-fromch) FROM tabsection WHERE substring(roadid,1,length(roadid)-5)=substring(B.pid,1,length(B.pid)-5) AND length(tcsid)-length(replace(tcsid,B.item,''))>0 AND substring(roadid,Length(roadid)-3,1)!='R') as T FROM (SELECT phycode as pid,substring(phycode,1,3)as rid,concat(item,substring(phycode,6,length(phycode)-10))as itemid,sum(qyt) as qyt,item FROM tabphysical WHERE substring(phycode,Length(phycode)-3,1)!='R' GROUP BY rid,substring(phycode,1,length(phycode)-5),itemid) as B JOIN  tabroad ON tabroad.rid=B.rid) as C LEFT JOIN (SELECT tabsubweight.*,tabweightage.mw,tabweightage.roadid FROM `tabsubweight` JOIN tabweightage ON tabweightage.id=tabsubweight.wid) as D ON D.roadid=C.rid  AND D.itemid=C.itemid WHERE  D.roadid='" . $a . "'GROUP BY D.mw,D.wp,itemid) as M  JOIN tabitemcode ON tabitemcode.itemid=M.itemid) AS F1";
-	// 	$this->prepare_bill($linearitem);
-	// 	$linearitem = "(SELECT CONCAT(M.rid,M.stageid)bid,M.stageid as itemid,Count(M.qyt)T,Sum(M.qyt)qyt,M.mw,tabsubweight.wp ,(SELECT logic from tabpaycon Where cid= tabsubweight.condition)l FROM (SELECT tabstgp.rid, tabstgp.stageid,E.mw,E.wid,(if(status='COMPLETED',1,0)) qyt FROM tabstgp LEFT JOIN (SELECT D.wid,C.id,(D.mw * C.length / C.l) AS mw FROM (SELECT A.*,B.l FROM (SELECT id, length, itemid FROM tabstageitem WHERE id LIKE '" . $a . "%') AS A LEFT JOIN (SELECT itemid, SUM(length) AS l FROM tabstageitem WHERE id LIKE '" . $a . "%' GROUP BY itemid) AS B ON A.itemid = B.itemid) AS C LEFT JOIN (SELECT tabweightage.id AS wid,SUBSTRING(tabsubweight.itemid, 1, 3) AS  itemid,tabweightage.mw FROM tabsubweight JOIN tabweightage ON tabweightage.id = tabsubweight.wid WHERE tabweightage.roadid = '" . $a . "'GROUP BY tabweightage.id,SUBSTRING(tabsubweight.itemid, 1, 3)) AS D ON D.itemid = C.itemid) AS E ON E.id = tabstgp.rid)M LEFT JOIN tabsubweight ON tabsubweight.wid=M.wid AND tabsubweight.itemid=M.stageid WHERE M.rid LIKE '" . $a . "%' GROUP BY M.rid,M.stageid) AS F1";
-	// 	$this->prepare_bill($linearitem);
-	// 	$amt = $this->db->select('sum(bamt) as amt')->where('spsid', $this->input->post('spsid'))->get('tabbill')->row_array();
 
-	// 	return $this->save_sps($amt['amt']);
-	// }
+	public function generate_invoice()
+	{
+		$a = $this->input->post('proad');
+		$locationitem = "(SELECT CONCAT(M.pid,M.itemid)bid,M.itemid,M.T,M.qyt,M.wp,M.mw,(SELECT logic from tabpaycon Where cid= M.l)l FROM (SELECT Sum(C.T)T,Sum(C.qyt)qyt,D.wp,D.mw,D.condition as l,C.pid,C.itemid FROM (SELECT A.pid,A.rid,tabitemcode.itemid,A.qyt,A.rlength as T FROM (SELECT Substring(itemcode,1,5)as pid,Substring(itemcode,1,3) as rid,itemsize,if(rem='%',descrip,count(itemsize)) as rlength,if(rem='%',Round(percent*descrip/100,0),Sum(if(progress='COMPLETED',1,0))) as qyt FROM tabschedule GROUP BY  Substring(itemcode,1,3),itemsize)As A JOIN tabitemcode ON tabitemcode.name=A.itemsize) as C LEFT JOIN
+				(SELECT tabsubweight.*,tabweightage.mw,tabweightage.roadid FROM `tabsubweight` JOIN tabweightage ON tabweightage.id=tabsubweight.wid) as D ON D.roadid=C.rid  AND D.itemid=C.itemid WHERE  D.roadid='" . $a . "'GROUP BY D.mw,D.wp,itemid) as M) AS F1";
+		$this->prepare_bill($locationitem);
+		$linearitem = "(SELECT(M.pid)bid,substring(M.itemid,1,3)itemid,M.T,M.qyt,M.wp,M.mw,(SELECT logic from tabpaycon Where cid= M.l)l FROM (SELECT Sum(C.T)T,Sum(C.qyt)qyt,D.wp,D.mw,D.condition as l,C.pid,C.itemid FROM(SELECT B.pid,B.rid,B.itemid,B.qyt,(SELECT sum(toch-fromch) FROM tabsection WHERE substring(roadid,1,length(roadid)-5)=substring(B.pid,1,length(B.pid)-5) AND length(tcsid)-length(replace(tcsid,B.item,''))>0 AND substring(roadid,Length(roadid)-3,1)!='R') as T FROM (SELECT phycode as pid,substring(phycode,1,3)as rid,concat(item,substring(phycode,6,length(phycode)-10))as itemid,sum(qyt) as qyt,item FROM tabphysical WHERE substring(phycode,Length(phycode)-3,1)!='R' GROUP BY rid,substring(phycode,1,length(phycode)-5),itemid) as B JOIN  tabroad ON tabroad.rid=B.rid) as C LEFT JOIN (SELECT tabsubweight.*,tabweightage.mw,tabweightage.roadid FROM `tabsubweight` JOIN tabweightage ON tabweightage.id=tabsubweight.wid) as D ON D.roadid=C.rid  AND D.itemid=C.itemid WHERE  D.roadid='" . $a . "'GROUP BY D.mw,D.wp,itemid) as M  JOIN tabitemcode ON tabitemcode.itemid=M.itemid) AS F1";
+		$this->prepare_bill($linearitem);
+		$linearitem = "(SELECT CONCAT(M.rid,M.stageid)bid,M.stageid as itemid,Count(M.qyt)T,Sum(M.qyt)qyt,M.mw,tabsubweight.wp ,(SELECT logic from tabpaycon Where cid= tabsubweight.condition)l FROM (SELECT tabstgp.rid, tabstgp.stageid,E.mw,E.wid,(if(status='COMPLETED',1,0)) qyt FROM tabstgp LEFT JOIN (SELECT D.wid,C.id,(D.mw * C.length / C.l) AS mw FROM (SELECT A.*,B.l FROM (SELECT id, length, itemid FROM tabstageitem WHERE id LIKE '" . $a . "%') AS A LEFT JOIN (SELECT itemid, SUM(length) AS l FROM tabstageitem WHERE id LIKE '" . $a . "%' GROUP BY itemid) AS B ON A.itemid = B.itemid) AS C LEFT JOIN (SELECT tabweightage.id AS wid,SUBSTRING(tabsubweight.itemid, 1, 3) AS  itemid,tabweightage.mw FROM tabsubweight JOIN tabweightage ON tabweightage.id = tabsubweight.wid WHERE tabweightage.roadid = '" . $a . "'GROUP BY tabweightage.id,SUBSTRING(tabsubweight.itemid, 1, 3)) AS D ON D.itemid = C.itemid) AS E ON E.id = tabstgp.rid)M LEFT JOIN tabsubweight ON tabsubweight.wid=M.wid AND tabsubweight.itemid=M.stageid WHERE M.rid LIKE '" . $a . "%' GROUP BY M.rid,M.stageid) AS F1";
+		$this->prepare_bill($linearitem);
+		$amt = $this->db->select('sum(bamt) as amt')->where('spsid', $this->input->post('spsid'))->get('tabbill')->row_array();
+
+		return $this->save_sps($amt['amt']);
+	}
+
+	public function prepare_bill($myquery)
+	{
+		date_default_timezone_set('Asia/Kolkata');
+		$mdate = date('Y-m-d H:i:s');
+
+
+		$this->db->query("DROP TEMPORARY TABLE IF EXISTS temp_point");
+		$querystring = "CREATE TEMPORARY TABLE temp_point AS
+		SELECT F1.bid,F1.itemid,F1.T,(F1.qyt - COALESCE(F2.b, 0)) AS n,F1.wp,F1.mw,(F1.T - COALESCE(F2.b, 0)) AS r, F1.l FROM " . $myquery . " LEFT JOIN 
+		(SELECT billcode, SUM(qyt) AS b FROM tabbill GROUP BY billcode) AS F2 ON F1.bid = F2.billcode WHERE (F1.qyt - COALESCE(F2.b, 0)) > 0";
+		$this->db->query($querystring);
+
+		$tm_project = $this->db->get('temp_point')->result_array();
+		foreach ($tm_project as $bill) {
+			$camt = $this->session->userdata('Camount');
+			$min = 100000; //big number to confirm 	
+			//all payment condition checked here
+			if (strpos($bill['l'], 'or') !== false || strpos($bill['l'], 'and') !== false) {
+				//complicated query will do later
+				$orcondition = explode('or', $bill['l']);
+				$min1 = $this->get_condition_val($orcondition[0], $bill['T']);
+				$min2 = $this->get_condition_val($orcondition[0], $bill['T']);
+				$min = min($min1, $min2);
+			} else {
+				//$min=1;
+				$min = $this->get_condition_val($bill['l'], $bill['T']);
+			}
+			// remainig quantity is equal to billed quantiyt or no condition or condition fullfilled
+			if ((($bill['n'] == $bill['r']) || ($bill['l'] == '100%') || ($bill['n'] >= $min)) && !is_null($bill['l'])) {
+				$billamt = Round($bill['n'] / $bill['T'] * $bill['mw'] * $bill['wp'] / 10000 * $camt, 3);
+				$object = array(
+					'billcode' => $bill['bid'],
+					'itemid' => $bill['itemid'],
+					'Tqyt' => $bill['T'],
+					'qyt' => $bill['n'],
+					'mw' => $bill['mw'],
+					'sw' => $bill['wp'],
+					'bamt' => $billamt,
+					'bdate' => $mdate,
+					'spsid' => $this->input->post('spsid')
+				);
+				$this->db->insert('tabbill', $object);
+			}
+		}
+	}
+
 
 	// public function generate_invoice()
 	// {
@@ -64,206 +111,22 @@ class M_Financial extends CI_Model
 	// 	$spsid = $this->input->post('spsid');
 
 	// 	// LOCATION ITEM QUERY
-	// 	$locationitem = "
-	// 		SELECT 
-	// 			CONCAT(M.pid, M.itemid) AS bid,
-	// 			M.itemid,
-	// 			M.T,
-	// 			M.qyt,
-	// 			M.wp,
-	// 			M.mw,
-	// 			P.logic AS l
-	// 		FROM (
-	// 			SELECT 
-	// 				SUM(C.T) AS T,
-	// 				SUM(C.qyt) AS qyt,
-	// 				D.wp,
-	// 				D.mw,
-	// 				D.condition AS l,
-	// 				C.pid,
-	// 				C.itemid
-	// 			FROM (
-	// 				SELECT 
-	// 					A.pid,
-	// 					A.rid,
-	// 					tabitemcode.itemid,
-	// 					A.qyt,
-	// 					A.rlength AS T
-	// 				FROM (
-	// 					SELECT 
-	// 						SUBSTRING(itemcode, 1, 5) AS pid,
-	// 						SUBSTRING(itemcode, 1, 3) AS rid,
-	// 						itemsize,
-	// 						IF(rem = '%', descrip, COUNT(itemsize)) AS rlength,
-	// 						IF(rem = '%', ROUND(percent * descrip / 100, 0), SUM(IF(progress = 'COMPLETED', 1, 0))) AS qyt
-	// 					FROM tabschedule
-	// 					GROUP BY SUBSTRING(itemcode, 1, 3), itemsize
-	// 				) AS A
-	// 				JOIN tabitemcode ON tabitemcode.name = A.itemsize
-	// 			) AS C
-	// 			LEFT JOIN (
-	// 				SELECT tabsubweight.*, tabweightage.mw, tabweightage.roadid 
-	// 				FROM tabsubweight 
-	// 				JOIN tabweightage ON tabweightage.id = tabsubweight.wid
-	// 			) AS D ON D.roadid = C.rid AND D.itemid = C.itemid
-	// 			WHERE D.roadid = ?
-	// 			GROUP BY D.mw, D.wp, itemid
-	// 		) AS M
-	// 		LEFT JOIN tabpaycon P ON P.cid = M.l
-	// 	";
-
+	// 	$locationitem = "SELECT CONCAT(M.pid, M.itemid) AS bid, M.itemid, M.T, M.qyt, M.wp, M.mw, P.logic AS l FROM (SELECT SUM(C.T) AS T, SUM(C.qyt) AS qyt, D.wp, D.mw, D.condition AS l, C.pid, C.itemid FROM (SELECT A.pid, A.rid, tabitemcode.itemid, A.qyt, A.rlength AS T FROM (SELECT SUBSTRING(itemcode, 1, 5) AS pid, SUBSTRING(itemcode, 1, 3) AS rid, itemsize, IF(rem = '%', descrip, COUNT(itemsize)) AS rlength, IF(rem = '%', ROUND(percent * descrip / 100, 0), SUM(IF(progress = 'COMPLETED', 1, 0))) AS qyt FROM tabschedule GROUP BY SUBSTRING(itemcode, 1, 3), itemsize) AS A JOIN tabitemcode ON tabitemcode.name = A.itemsize) AS C LEFT JOIN (SELECT tabsubweight.*, tabweightage.mw, tabweightage.roadid FROM tabsubweight JOIN tabweightage ON tabweightage.id = tabsubweight.wid) AS D ON D.roadid = C.rid AND D.itemid = C.itemid WHERE D.roadid = ? GROUP BY D.mw, D.wp, itemid) AS M LEFT JOIN tabpaycon P ON P.cid = M.l";
 	// 	$this->prepare_bill($locationitem, [$proad]);
 
 	// 	// LINEAR ITEM QUERY
-	// 	$linearitem = "
-	// 		SELECT 
-	// 			M.pid AS bid,
-	// 			SUBSTRING(M.itemid, 1, 3) AS itemid,
-	// 			M.T,
-	// 			M.qyt,
-	// 			M.wp,
-	// 			M.mw,
-	// 			P.logic AS l
-	// 		FROM (
-	// 			SELECT 
-	// 				SUM(C.T) AS T,
-	// 				SUM(C.qyt) AS qyt,
-	// 				D.wp,
-	// 				D.mw,
-	// 				D.condition AS l,
-	// 				C.pid,
-	// 				C.itemid
-	// 			FROM (
-	// 				SELECT 
-	// 					B.pid,
-	// 					B.rid,
-	// 					B.itemid,
-	// 					B.qyt,
-	// 					(
-	// 						SELECT SUM(toch - fromch)
-	// 						FROM tabsection 
-	// 						WHERE SUBSTRING(roadid, 1, LENGTH(roadid) - 5) = SUBSTRING(B.pid, 1, LENGTH(B.pid) - 5)
-	// 						AND LENGTH(tcsid) - LENGTH(REPLACE(tcsid, B.item, '')) > 0
-	// 						AND SUBSTRING(roadid, LENGTH(roadid) - 3, 1) != 'R'
-	// 					) AS T
-	// 				FROM (
-	// 					SELECT 
-	// 						phycode AS pid,
-	// 						SUBSTRING(phycode, 1, 3) AS rid,
-	// 						CONCAT(item, SUBSTRING(phycode, 6, LENGTH(phycode) - 10)) AS itemid,
-	// 						SUM(qyt) AS qyt,
-	// 						item
-	// 					FROM tabphysical
-	// 					WHERE SUBSTRING(phycode, LENGTH(phycode) - 3, 1) != 'R'
-	// 					GROUP BY rid, SUBSTRING(phycode, 1, LENGTH(phycode) - 5), itemid
-	// 				) AS B
-	// 				JOIN tabroad ON tabroad.rid = B.rid
-	// 			) AS C
-	// 			LEFT JOIN (
-	// 				SELECT tabsubweight.*, tabweightage.mw, tabweightage.roadid 
-	// 				FROM tabsubweight 
-	// 				JOIN tabweightage ON tabweightage.id = tabsubweight.wid
-	// 			) AS D ON D.roadid = C.rid AND D.itemid = C.itemid
-	// 			WHERE D.roadid = ?
-	// 			GROUP BY D.mw, D.wp, itemid
-	// 		) AS M
-	// 		JOIN tabitemcode ON tabitemcode.itemid = M.itemid
-	// 		LEFT JOIN tabpaycon P ON P.cid = M.l
-	// 	";
-
+	// 	$linearitem = "SELECT M.pid AS bid, SUBSTRING(M.itemid, 1, 3) AS itemid, M.T, M.qyt, M.wp, M.mw, P.logic AS l FROM (SELECT SUM(C.T) AS T, SUM(C.qyt) AS qyt, D.wp, D.mw, D.condition AS l, C.pid, C.itemid FROM (SELECT B.pid, B.rid, B.itemid, B.qyt, (SELECT SUM(toch - fromch) FROM tabsection WHERE SUBSTRING(roadid, 1, LENGTH(roadid) - 5) = SUBSTRING(B.pid, 1, LENGTH(B.pid) - 5) AND LENGTH(tcsid) - LENGTH(REPLACE(tcsid, B.item, '')) > 0 AND SUBSTRING(roadid, LENGTH(roadid) - 3, 1) != 'R') AS T FROM (SELECT phycode AS pid, SUBSTRING(phycode, 1, 3) AS rid, CONCAT(item, SUBSTRING(phycode, 6, LENGTH(phycode) - 10)) AS itemid, SUM(qyt) AS qyt, item FROM tabphysical WHERE SUBSTRING(phycode, LENGTH(phycode) - 3, 1) != 'R' GROUP BY rid, SUBSTRING(phycode, 1, LENGTH(phycode) - 5), itemid) AS B JOIN tabroad ON tabroad.rid = B.rid) AS C LEFT JOIN (SELECT tabsubweight.*, tabweightage.mw, tabweightage.roadid FROM tabsubweight JOIN tabweightage ON tabweightage.id = tabsubweight.wid) AS D ON D.roadid = C.rid AND D.itemid = C.itemid WHERE D.roadid = ? GROUP BY D.mw, D.wp, itemid) AS M JOIN tabitemcode ON tabitemcode.itemid = M.itemid LEFT JOIN tabpaycon P ON P.cid = M.l";
 	// 	$this->prepare_bill($linearitem, [$proad]);
 
 	// 	// STAGE ITEM QUERY
-	// 	$stageitem = "
-	// 		SELECT 
-	// 			CONCAT(M.rid, M.stageid) AS bid,
-	// 			M.stageid AS itemid,
-	// 			COUNT(M.qyt) AS T,
-	// 			SUM(M.qyt) AS qyt,
-	// 			M.mw,
-	// 			tabsubweight.wp,
-	// 			tabpaycon.logic AS l
-	// 		FROM (
-	// 			SELECT 
-	// 				tabstgp.rid,
-	// 				tabstgp.stageid,
-	// 				E.mw,
-	// 				E.wid,
-	// 				(IF(status = 'COMPLETED', 1, 0)) AS qyt
-	// 			FROM tabstgp
-	// 			LEFT JOIN (
-	// 				SELECT 
-	// 					D.wid,
-	// 					C.id,
-	// 					(D.mw * C.length / C.l) AS mw
-	// 				FROM (
-	// 					SELECT 
-	// 						A.*, 
-	// 						B.l
-	// 					FROM (
-	// 						SELECT id, length, itemid 
-	// 						FROM tabstageitem 
-	// 						WHERE id LIKE ?
-	// 					) AS A
-	// 					LEFT JOIN (
-	// 						SELECT itemid, SUM(length) AS l 
-	// 						FROM tabstageitem 
-	// 						WHERE id LIKE ?
-	// 						GROUP BY itemid
-	// 					) AS B ON A.itemid = B.itemid
-	// 				) AS C
-	// 				LEFT JOIN (
-	// 					SELECT 
-	// 						tabweightage.id AS wid,
-	// 						SUBSTRING(tabsubweight.itemid, 1, 3) AS itemid,
-	// 						tabweightage.mw
-	// 					FROM tabsubweight 
-	// 					JOIN tabweightage ON tabweightage.id = tabsubweight.wid
-	// 					WHERE tabweightage.roadid = ?
-	// 					GROUP BY tabweightage.id, SUBSTRING(tabsubweight.itemid, 1, 3)
-	// 				) AS D ON D.itemid = C.itemid
-	// 			) AS E ON E.id = tabstgp.rid
-	// 		) AS M
-	// 		LEFT JOIN tabsubweight ON tabsubweight.wid = M.wid AND tabsubweight.itemid = M.stageid
-	// 		LEFT JOIN tabpaycon ON tabpaycon.cid = tabsubweight.condition
-	// 		WHERE M.rid LIKE ?
-	// 		GROUP BY M.rid, M.stageid
-	// 	";
-
+	// 	$stageitem = "SELECT CONCAT(M.rid, M.stageid) AS bid, M.stageid AS itemid, COUNT(M.qyt) AS T, SUM(M.qyt) AS qyt, M.mw, tabsubweight.wp, tabpaycon.logic AS l FROM (SELECT tabstgp.rid, tabstgp.stageid, E.mw, E.wid, (IF(status = 'COMPLETED', 1, 0)) AS qyt FROM tabstgp LEFT JOIN (SELECT D.wid, C.id, (D.mw * C.length / C.l) AS mw FROM (SELECT A.*, B.l FROM (SELECT id, length, itemid FROM tabstageitem WHERE id LIKE ?) AS A LEFT JOIN (SELECT itemid, SUM(length) AS l FROM tabstageitem WHERE id LIKE ? GROUP BY itemid) AS B ON A.itemid = B.itemid) AS C LEFT JOIN (SELECT tabweightage.id AS wid, SUBSTRING(tabsubweight.itemid, 1, 3) AS itemid, tabweightage.mw FROM tabsubweight JOIN tabweightage ON tabweightage.id = tabsubweight.wid WHERE tabweightage.roadid = ? GROUP BY tabweightage.id, SUBSTRING(tabsubweight.itemid, 1, 3)) AS D ON D.itemid = C.itemid) AS E ON E.id = tabstgp.rid) AS M LEFT JOIN tabsubweight ON tabsubweight.wid = M.wid AND tabsubweight.itemid = M.stageid LEFT JOIN tabpaycon ON tabpaycon.cid = tabsubweight.condition WHERE M.rid LIKE ? GROUP BY M.rid, M.stageid";
 	// 	$this->prepare_bill($stageitem, ["$proad%", "$proad%", $proad, "$proad%"]);
 
 	// 	// Fetch total amount
-	// 	$amt = $this->db->select('SUM(bamt) AS amt')
-	// 		->where('spsid', $spsid)
-	// 		->get('tabbill')
-	// 		->row_array();
-	// 	// echo $this->db->last_query();die;
+	// 	$amt = $this->db->select('SUM(bamt) AS amt')->where('spsid', $spsid)->get('tabbill')->row_array();
 
 	// 	return $this->save_sps($amt['amt']);
 	// }
-
-	public function generate_invoice()
-	{
-		$proad = $this->input->post('proad');
-		$spsid = $this->input->post('spsid');
-
-		// LOCATION ITEM QUERY
-		$locationitem = "SELECT CONCAT(M.pid, M.itemid) AS bid, M.itemid, M.T, M.qyt, M.wp, M.mw, P.logic AS l FROM (SELECT SUM(C.T) AS T, SUM(C.qyt) AS qyt, D.wp, D.mw, D.condition AS l, C.pid, C.itemid FROM (SELECT A.pid, A.rid, tabitemcode.itemid, A.qyt, A.rlength AS T FROM (SELECT SUBSTRING(itemcode, 1, 5) AS pid, SUBSTRING(itemcode, 1, 3) AS rid, itemsize, IF(rem = '%', descrip, COUNT(itemsize)) AS rlength, IF(rem = '%', ROUND(percent * descrip / 100, 0), SUM(IF(progress = 'COMPLETED', 1, 0))) AS qyt FROM tabschedule GROUP BY SUBSTRING(itemcode, 1, 3), itemsize) AS A JOIN tabitemcode ON tabitemcode.name = A.itemsize) AS C LEFT JOIN (SELECT tabsubweight.*, tabweightage.mw, tabweightage.roadid FROM tabsubweight JOIN tabweightage ON tabweightage.id = tabsubweight.wid) AS D ON D.roadid = C.rid AND D.itemid = C.itemid WHERE D.roadid = ? GROUP BY D.mw, D.wp, itemid) AS M LEFT JOIN tabpaycon P ON P.cid = M.l";
-		$this->prepare_bill($locationitem, [$proad]);
-
-		// LINEAR ITEM QUERY
-		$linearitem = "SELECT M.pid AS bid, SUBSTRING(M.itemid, 1, 3) AS itemid, M.T, M.qyt, M.wp, M.mw, P.logic AS l FROM (SELECT SUM(C.T) AS T, SUM(C.qyt) AS qyt, D.wp, D.mw, D.condition AS l, C.pid, C.itemid FROM (SELECT B.pid, B.rid, B.itemid, B.qyt, (SELECT SUM(toch - fromch) FROM tabsection WHERE SUBSTRING(roadid, 1, LENGTH(roadid) - 5) = SUBSTRING(B.pid, 1, LENGTH(B.pid) - 5) AND LENGTH(tcsid) - LENGTH(REPLACE(tcsid, B.item, '')) > 0 AND SUBSTRING(roadid, LENGTH(roadid) - 3, 1) != 'R') AS T FROM (SELECT phycode AS pid, SUBSTRING(phycode, 1, 3) AS rid, CONCAT(item, SUBSTRING(phycode, 6, LENGTH(phycode) - 10)) AS itemid, SUM(qyt) AS qyt, item FROM tabphysical WHERE SUBSTRING(phycode, LENGTH(phycode) - 3, 1) != 'R' GROUP BY rid, SUBSTRING(phycode, 1, LENGTH(phycode) - 5), itemid) AS B JOIN tabroad ON tabroad.rid = B.rid) AS C LEFT JOIN (SELECT tabsubweight.*, tabweightage.mw, tabweightage.roadid FROM tabsubweight JOIN tabweightage ON tabweightage.id = tabsubweight.wid) AS D ON D.roadid = C.rid AND D.itemid = C.itemid WHERE D.roadid = ? GROUP BY D.mw, D.wp, itemid) AS M JOIN tabitemcode ON tabitemcode.itemid = M.itemid LEFT JOIN tabpaycon P ON P.cid = M.l";
-		$this->prepare_bill($linearitem, [$proad]);
-
-		// STAGE ITEM QUERY
-		$stageitem = "SELECT CONCAT(M.rid, M.stageid) AS bid, M.stageid AS itemid, COUNT(M.qyt) AS T, SUM(M.qyt) AS qyt, M.mw, tabsubweight.wp, tabpaycon.logic AS l FROM (SELECT tabstgp.rid, tabstgp.stageid, E.mw, E.wid, (IF(status = 'COMPLETED', 1, 0)) AS qyt FROM tabstgp LEFT JOIN (SELECT D.wid, C.id, (D.mw * C.length / C.l) AS mw FROM (SELECT A.*, B.l FROM (SELECT id, length, itemid FROM tabstageitem WHERE id LIKE ?) AS A LEFT JOIN (SELECT itemid, SUM(length) AS l FROM tabstageitem WHERE id LIKE ? GROUP BY itemid) AS B ON A.itemid = B.itemid) AS C LEFT JOIN (SELECT tabweightage.id AS wid, SUBSTRING(tabsubweight.itemid, 1, 3) AS itemid, tabweightage.mw FROM tabsubweight JOIN tabweightage ON tabweightage.id = tabsubweight.wid WHERE tabweightage.roadid = ? GROUP BY tabweightage.id, SUBSTRING(tabsubweight.itemid, 1, 3)) AS D ON D.itemid = C.itemid) AS E ON E.id = tabstgp.rid) AS M LEFT JOIN tabsubweight ON tabsubweight.wid = M.wid AND tabsubweight.itemid = M.stageid LEFT JOIN tabpaycon ON tabpaycon.cid = tabsubweight.condition WHERE M.rid LIKE ? GROUP BY M.rid, M.stageid";
-		$this->prepare_bill($stageitem, ["$proad%", "$proad%", $proad, "$proad%"]);
-
-		// Fetch total amount
-		$amt = $this->db->select('SUM(bamt) AS amt')->where('spsid', $spsid)->get('tabbill')->row_array();
-
-		return $this->save_sps($amt['amt']);
-	}
 
 	// public function prepare_bill($myquery, $bindings = [])
 	// {
@@ -329,93 +192,49 @@ class M_Financial extends CI_Model
 	// 	}
 	// }
 
-	public function prepare_bill($myquery, $bindings = [])
-	{
-		date_default_timezone_set('Asia/Kolkata');
-		$mdate = date('Y-m-d H:i:s');
-
-		$wrapped_query = " SELECT F1.bid, F1.itemid, F1.T, (F1.qyt - COALESCE(F2.b, 0)) AS n, F1.wp, F1.mw, (F1.T - COALESCE(F2.b, 0)) AS r, F1.l FROM (" . $myquery . ") AS F1 LEFT JOIN ( SELECT billcode, SUM(qyt) AS b FROM tabbill GROUP BY billcode ) AS F2 ON F1.bid = F2.billcode WHERE (F1.qyt - COALESCE(F2.b, 0)) > 0 ";
-
-		$rows = $this->db->query($wrapped_query, $bindings)->result_array();
-
-		foreach ($rows as $bill) {
-			$camt = $this->session->userdata('Camount');
-			$min = 100000;
-
-			if (strpos($bill['l'], 'or') !== false || strpos($bill['l'], 'and') !== false) {
-				$orcondition = explode('or', $bill['l']);
-				$min1 = $this->get_condition_val(trim($orcondition[0]), $bill['T']);
-				$min2 = $this->get_condition_val(trim($orcondition[1]), $bill['T']);
-				$min = min($min1, $min2);
-			} else {
-				$min = $this->get_condition_val($bill['l'], $bill['T']);
-			}
-
-			if ((($bill['n'] == $bill['r']) || ($bill['l'] == '100%') || ($bill['n'] >= $min)) && !is_null($bill['l'])) {
-				$billamt = round($bill['n'] / $bill['T'] * $bill['mw'] * $bill['wp'] / 10000 * $camt, 3);
-
-				$object = array(
-					'billcode' => $bill['bid'],
-					'itemid'   => $bill['itemid'],
-					'Tqyt'     => $bill['T'],
-					'qyt'      => $bill['n'],
-					'mw'       => $bill['mw'],
-					'sw'       => $bill['wp'],
-					'bamt'     => $billamt,
-					'bdate'    => $mdate,
-					'spsid'    => $this->input->post('spsid')
-				);
-
-				$this->db->insert('tabbill', $object);
-			}
-		}
-	}
-
-	// public function prepare_bill($myquery)
+	// public function prepare_bill($myquery, $bindings = [])
 	// {
 	// 	date_default_timezone_set('Asia/Kolkata');
 	// 	$mdate = date('Y-m-d H:i:s');
 
+	// 	$wrapped_query = " SELECT F1.bid, F1.itemid, F1.T, (F1.qyt - COALESCE(F2.b, 0)) AS n, F1.wp, F1.mw, (F1.T - COALESCE(F2.b, 0)) AS r, F1.l FROM (" . $myquery . ") AS F1 LEFT JOIN ( SELECT billcode, SUM(qyt) AS b FROM tabbill GROUP BY billcode ) AS F2 ON F1.bid = F2.billcode WHERE (F1.qyt - COALESCE(F2.b, 0)) > 0 ";
 
-	// 	$this->db->query("DROP TEMPORARY TABLE IF EXISTS temp_point");
-	// 	$querystring = "CREATE TEMPORARY TABLE temp_point AS
-	// 	SELECT F1.bid,F1.itemid,F1.T,(F1.qyt - COALESCE(F2.b, 0)) AS n,F1.wp,F1.mw,(F1.T - COALESCE(F2.b, 0)) AS r, F1.l FROM " . $myquery . " LEFT JOIN 
-	// 	(SELECT billcode, SUM(qyt) AS b FROM tabbill GROUP BY billcode) AS F2 ON F1.bid = F2.billcode WHERE (F1.qyt - COALESCE(F2.b, 0)) > 0";
-	// 	$this->db->query($querystring);
+	// 	$rows = $this->db->query($wrapped_query, $bindings)->result_array();
 
-	// 	$tm_project = $this->db->get('temp_point')->result_array();
-	// 	foreach ($tm_project as $bill) {
+	// 	foreach ($rows as $bill) {
 	// 		$camt = $this->session->userdata('Camount');
-	// 		$min = 100000; //big number to confirm 	
-	// 		//all payment condition checked here
+	// 		$min = 100000;
+
 	// 		if (strpos($bill['l'], 'or') !== false || strpos($bill['l'], 'and') !== false) {
-	// 			//complicated query will do later
 	// 			$orcondition = explode('or', $bill['l']);
-	// 			$min1 = $this->get_condition_val($orcondition[0], $bill['T']);
-	// 			$min2 = $this->get_condition_val($orcondition[0], $bill['T']);
+	// 			$min1 = $this->get_condition_val(trim($orcondition[0]), $bill['T']);
+	// 			$min2 = $this->get_condition_val(trim($orcondition[1]), $bill['T']);
 	// 			$min = min($min1, $min2);
 	// 		} else {
-	// 			//$min=1;
 	// 			$min = $this->get_condition_val($bill['l'], $bill['T']);
 	// 		}
-	// 		// remainig quantity is equal to billed quantiyt or no condition or condition fullfilled
+
 	// 		if ((($bill['n'] == $bill['r']) || ($bill['l'] == '100%') || ($bill['n'] >= $min)) && !is_null($bill['l'])) {
-	// 			$billamt = Round($bill['n'] / $bill['T'] * $bill['mw'] * $bill['wp'] / 10000 * $camt, 3);
+	// 			$billamt = round($bill['n'] / $bill['T'] * $bill['mw'] * $bill['wp'] / 10000 * $camt, 3);
+
 	// 			$object = array(
 	// 				'billcode' => $bill['bid'],
-	// 				'itemid' => $bill['itemid'],
-	// 				'Tqyt' => $bill['T'],
-	// 				'qyt' => $bill['n'],
-	// 				'mw' => $bill['mw'],
-	// 				'sw' => $bill['wp'],
-	// 				'bamt' => $billamt,
-	// 				'bdate' => $mdate,
-	// 				'spsid' => $this->input->post('spsid')
+	// 				'itemid'   => $bill['itemid'],
+	// 				'Tqyt'     => $bill['T'],
+	// 				'qyt'      => $bill['n'],
+	// 				'mw'       => $bill['mw'],
+	// 				'sw'       => $bill['wp'],
+	// 				'bamt'     => $billamt,
+	// 				'bdate'    => $mdate,
+	// 				'spsid'    => $this->input->post('spsid')
 	// 			);
+
 	// 			$this->db->insert('tabbill', $object);
 	// 		}
 	// 	}
 	// }
+
+
 	public function get_condition_val($a, $mv)
 	{
 		$mresult = 1;
@@ -468,62 +287,29 @@ class M_Financial extends CI_Model
 	// 		return $data;}
 
 	// }
-	// public function get_pkg()
-	// {
-	// 	$rlist = $this->session->userdata('pkglist');
-	// 	// print_r($rlist);die;
-
-	// 	if (empty($rlist)) {
-	// 		return $this->db->order_by('flowid')->get('tabfinprocess')->result_array();
-	// 	}
-
-	// 	// Remove leading colon, explode by colon
-	// 	$rlist = ltrim($rlist, ':');
-	// 	$pkgids = explode(':', $rlist);
-
-	// 	// Get all rows where pkgid in $pkgids
-	// 	$tm_project = $this->db
-	// 		->order_by('flowid')
-	// 		->where_in('pkgid', $pkgids)
-	// 		->get('tabfinprocess')
-	// 		->result_array();
-	// 		// echo $this->db->last_query();die;
-
-	// 	return $tm_project;
-	// }
-
 	public function get_pkg()
 	{
-		$pkglist = $this->session->userdata('pkglist');
-		$level = $this->session->userdata('level');
+		$rlist = $this->session->userdata('pkglist');
+		// print_r($rlist);die;
 
-		// ✅ If admin, return all packages
-		if ($level === 'Admin') {
+		if (empty($rlist)) {
 			return $this->db->order_by('flowid')->get('tabfinprocess')->result_array();
 		}
 
-		// ✅ If not admin but pkglist is empty, also return all
-		if (empty($pkglist)) {
-			return $this->db->order_by('flowid')->get('tabfinprocess')->result_array();
-		}
+		// Remove leading colon, explode by colon
+		$rlist = ltrim($rlist, ':');
+		$pkgids = explode(':', $rlist);
 
-		// 🔄 Remove leading colon, explode by colon
-		$pkglist = ltrim($pkglist, ':');
-		$pkgids = explode(':', $pkglist);
-
-		// 🧹 Remove duplicates
-		$pkgids = array_unique($pkgids);
-
-		// ✅ Get only allowed packages
+		// Get all rows where pkgid in $pkgids
 		$tm_project = $this->db
 			->order_by('flowid')
 			->where_in('pkgid', $pkgids)
 			->get('tabfinprocess')
 			->result_array();
+			// echo $this->db->last_query();die;
 
 		return $tm_project;
 	}
-
 
 	public function get_road()
 	{
