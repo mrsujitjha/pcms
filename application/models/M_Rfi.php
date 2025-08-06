@@ -50,9 +50,9 @@ class M_Rfi extends CI_Model
 			$a = $this->session->userdata('roadid');
 		}
 		$myquery = "SELECT * FROM (SELECT (SELECT if(length(F2.item)-Length(replace(F2.item,itemid,''))>0,itemid,'')
-FROM (SELECT GROUP_CONCAT(F1.b) item FROM( SELECT DISTINCT (`tcsid`) b, substring(`roadid`,1,3)a FROM `tabsection` WHERE `roadid` LIKE '" . $a . "%')F1 GROUP BY F1.a) as F2) a,name as b FROM tabitemcode) as F3 WHERE length(F3.a)>0
-UNION SELECT Distinct(`itemid`)a,itemname as b FROM `tabstageitem` WHERE `id`LIKE '" . $a . "%'
-UNION SELECT DISTINCT (F1.itemid)a, (F1.itemsize)b FROM (SELECT tabitemcode.itemid,tabschedule.itemsize FROM tabschedule LEFT JOIN tabitemcode ON tabschedule.itemsize=tabitemcode.name WHERE tabschedule.itemcode LIKE '" . $a . "%') F1";
+		FROM (SELECT GROUP_CONCAT(F1.b) item FROM( SELECT DISTINCT (`tcsid`) b, substring(`roadid`,1,3)a FROM `tabsection` WHERE `roadid` LIKE '" . $a . "%')F1 GROUP BY F1.a) as F2) a,name as b FROM tabitemcode) as F3 WHERE length(F3.a)>0
+		UNION SELECT Distinct(`itemid`)a,itemname as b FROM `tabstageitem` WHERE `id`LIKE '" . $a . "%'
+		UNION SELECT DISTINCT (F1.itemid)a, (F1.itemsize)b FROM (SELECT tabitemcode.itemid,tabschedule.itemsize FROM tabschedule LEFT JOIN tabitemcode ON tabschedule.itemsize=tabitemcode.name WHERE tabschedule.itemcode LIKE '" . $a . "%') F1";
 		$tm_project = $this->db->query($myquery)->result();
 		return $tm_project;
 	}
@@ -118,6 +118,9 @@ UNION SELECT DISTINCT (F1.itemid)a, (F1.itemsize)b FROM (SELECT tabitemcode.item
 		$currentTime = date("H:i");
 		$a = $this->input->post('chepro');
 		$apprv = $this->input->post('action2');
+		$finalApproved = $this->input->post('final_approved') === 'yes' ? true : false;
+		$rfiid = $this->input->post('rfiid2');
+		$location = $this->input->post('chd');
 		$object = array(
 			'rfiid' => $this->input->post('rfiid2'),
 			'muser' => $this->input->post('ulist2'),
@@ -128,6 +131,12 @@ UNION SELECT DISTINCT (F1.itemid)a, (F1.itemsize)b FROM (SELECT tabitemcode.item
 			'action' => $apprv
 		);
 		$b = $this->db->insert('tabrfiaction', $object);
+
+		if ($b && $apprv == 'Approved' && $finalApproved) {
+			$this->db->where('rfiid', $rfiid);
+			$this->db->where('location', $location);
+			$this->db->update('tabrfi', ['action' => 'Approved']);
+		}
 		if ($b && $apprv == 'Approved') {
 			$id = substr($this->input->post('rfiid2'), 3, 3);
 			$tinfo = $this->verify_item($id);
@@ -322,5 +331,48 @@ UNION SELECT DISTINCT (F1.itemid)a, (F1.itemsize)b FROM (SELECT tabitemcode.item
 	public function hapus_Rfi($id = '')
 	{
 		return $this->db->where('rfiid', $id)->delete('tabrfi');
+	}
+	public function get_user($rfiid = null)
+	{
+		// Get rfiflow and muser for this RFI
+		$this->db->select('rfiflow, muser');
+		$this->db->where('rfiid', $rfiid);
+		$row = $this->db->get('tabrfi')->row();
+
+		// Prepare exclusion list
+		$excluded_usernames = [];
+
+		if ($row) {
+			// Split rfiflow like 'anil,suresh' => ['anil', 'suresh']
+			$flowUsers = array_filter(array_map('trim', explode(',', $row->rfiflow)));
+			$excluded_usernames = array_merge($excluded_usernames, $flowUsers);
+
+			// Add muser (assigned user)
+			if (!empty($row->muser)) {
+				$excluded_usernames[] = trim($row->muser);
+			}
+		}
+
+		// Also add current logged-in user (optional)
+		$excluded_usernames[] = $this->session->userdata('username');
+
+		// Remove duplicate usernames
+		$excluded_usernames = array_unique($excluded_usernames);
+
+		// Now filter users
+		$roadid = $this->session->userdata('roadid');
+
+		$this->db->where("LENGTH(rlist) - LENGTH(REPLACE(rlist, '{$roadid}', '')) > 0", null, false);
+		$this->db->where("LENGTH(autho) - LENGTH(REPLACE(autho, '274', '')) > 0", null, false);
+		$this->db->where_not_in('username', $excluded_usernames); // 🚫 Don't include already assigned users
+		$this->db->order_by('fullname');
+
+		return $this->db->get('user')->result();
+	}
+
+	public function update_rfiflow($rfiid, $userList)
+	{
+		$this->db->where('rfiid', $rfiid);
+		return $this->db->update('tabrfi', ['rfiflow' => $userList]);
 	}
 }

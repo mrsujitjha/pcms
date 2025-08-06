@@ -9,6 +9,11 @@ class M_item extends CI_Model
 		$tm_user = $this->db->get('tabitemcode')->result();
 		return $tm_user;
 	}
+	public function get_items_list()
+	{
+		$get_items_list = $this->db->get('tabitemcode')->result();
+		return $get_items_list;
+	}
 	public function save_item()
 	{
 		$object = array(
@@ -142,7 +147,8 @@ class M_item extends CI_Model
 			'dash' => $this->input->post('dash2'),
 			'punch' => $this->input->post('punch2'),
 			'draw' => $this->input->post('draw2'),
-			'sitem' => $this->input->post('sitem2')
+			'sitem' => $this->input->post('sitem2'),
+			'completed' => $this->input->post('completed_items'),
 		);
 		return $this->db->where('itemid', $this->input->post('user_code_lama'))->update('tabitemcode', $object);
 	}

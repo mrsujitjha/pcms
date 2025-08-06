@@ -13,6 +13,7 @@ class Item extends CI_Controller
 	{
 		$data['get_item'] = $this->Item->get_item();
 		$data['content'] = "v_item";
+		$data['get_items_list'] = $this->Item->get_items_list();
 		$this->load->view('template', $data);
 	}
 	public function add()
@@ -119,6 +120,63 @@ class Item extends CI_Controller
 		} else {
 			$this->session->set_flashdata('message', 'Failed to delete');
 			redirect('Item', 'refresh');
+		}
+	}
+
+	// public function mark_completed()
+	// {
+	// 	$itemid = $this->input->post('itemid');
+	// 	$subitem = $this->input->post('subitem');
+	// 	$this->db->where('itemid', $itemid);
+	// 	$this->db->where('descrip', $subitem);
+	// 	$row = $this->db->get('tabrfiitem')->row();
+
+	// 	if ($row) {
+	// 		if ($row->completed == $row->id) {
+	// 			$this->db->where('itemid', $itemid);
+	// 			$this->db->where('descrip', $subitem);
+	// 			$this->db->update('tabrfiitem', ['completed' => NULL]);
+	// 			echo "REMOVED|" . $row->id;
+	// 		} else {
+	// 			$this->db->where('itemid', $itemid);
+	// 			$this->db->where('descrip', $subitem);
+	// 			$this->db->update('tabrfiitem', ['completed' => $row->id]);
+	// 			echo "ADDED|" . $row->id;
+	// 		}
+	// 	} else {
+	// 		echo "0";
+	// 	}
+	// }
+
+	public function mark_completed()
+	{
+		$itemid = $this->input->post('itemid');
+		$current = $this->input->post('current');
+		$upper = $this->input->post('upper');
+
+		if (!$current || !$upper || !$itemid) {
+			echo "INVALID";
+			return;
+		}
+
+		$this->db->where('itemid', $itemid);
+		$this->db->where('descrip', $upper);
+		$upperRow = $this->db->get('tabrfiitem')->row();
+
+		if (!$upperRow) {
+			echo "UPPER NOT FOUND";
+			return;
+		}
+
+		$upperId = $upperRow->id;
+		$this->db->where('itemid', $itemid);
+		$this->db->where('descrip', $current);
+		$updated = $this->db->update('tabrfiitem', ['completed' => $upperId]);
+
+		if ($updated) {
+			echo "Completed ID set to: " . $upperId;
+		} else {
+			echo "Update failed";
 		}
 	}
 }
